@@ -1,6 +1,7 @@
 import pygame
 from random import randint
-from math import floor
+from typing import List
+from os import path
 
 pygame.init()
 
@@ -10,48 +11,47 @@ FRUITQUANTITY = 3
 FPS = 20
 WAITTIME = 10
 
+#quantidade, max quantity
+total_fruits = 0
+max_fruits = (HEIGHT-FONTSIZE)*WIDTH
+
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
-pygame.display.set_caption(f'SNAKE')
 clock = pygame.time.Clock()
 cwd = path.dirname(path.realpath(__file__))
 chomp = pygame.mixer.Sound(path.join(cwd, "pacman_eatfruit.wav"))
 
-
-class Square(pygame.sprite.Sprite):
+class Body(pygame.sprite.Sprite):
     def __init__(self,w,h,color,x,y, *grupos):
         super().__init__(grupos)
         self.image = pygame.Surface((w,h))
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
-class Snake(pygame.sprite.Sprite):
-    segmentos = []
+
+class Snake():
+    segmentos : List[Body] = []
     tail = pygame.sprite.Group()
     come = 0
 
     def __init__(self, *grupos):
         self.grupos = grupos
         super().__init__()
-        self.head = Square(10,10,(0,255,0),40,10+FONTSIZE,self.grupos)
+        self.head = Body(10,10,(0,255,0),40,10+FONTSIZE,self.grupos)
         self.segmentos.append(self.head)
-        self.segmentos.append(Square(10,10,(255,255,255),30,10+FONTSIZE,self.grupos,self.tail))
-        self.segmentos.append(Square(10,10,(255,255,255),20,10+FONTSIZE,self.grupos,self.tail))
+        self.segmentos.append(Body(10,10,(255,255,255),30,10+FONTSIZE,self.grupos,self.tail))
+        self.segmentos.append(Body(10,10,(255,255,255),20,10+FONTSIZE,self.grupos,self.tail))
         #colisoes
         self.vx,self.vy = 10,0
-    def update(self):
-        keyboard = pygame.key.get_pressed()
-        #muda a velocidade
-        if (keyboard[pygame.K_a] or keyboard[pygame.K_LEFT]) and self.come != 0: self.vx,self.vy = -10,0; self.come = 2
-        elif (keyboard[pygame.K_s] or keyboard[pygame.K_DOWN]) and self.come != 1: self.vx,self.vy = 0,10; self.come = 3
-        elif (keyboard[pygame.K_d] or keyboard[pygame.K_RIGHT]) and self.come != 2: self.vx,self.vy = 10,0; self.come = 0
-        elif (keyboard[pygame.K_w] or keyboard[pygame.K_UP]) and self.come != 3: self.vx,self.vy = 0,-10; self.come = 1
+
+    def update(self,fruits):
+        global max_fruits,total_fruits, loop, pontos
         #Checa se possui uma fruta
         if pygame.sprite.spritecollide(self.head,fruits,True):
             chomp.play()
-            self.segmentos.append(Square(10,10,(255,255,255),0,0,self.grupos,self.tail))
-            fruit = Fruit(player_sprites,fruits,all_sprites)
-            fruits.add(fruit)
-            global pontos; pontos+=1
+            self.segmentos.append(Body(10,10,(255,255,255),0,0,self.grupos,self.tail))
+            if (total_fruits < max_fruits): Fruit(player_sprites,fruits,all_sprites); total_fruits += 1
+            pontos += 1
+        if pontos >= max_fruits: loop = False
         #Move os segmentos
         for i in range(len(self.segmentos)-1,0,-1): self.segmentos[i].rect.topleft = self.segmentos[i-1].rect.topleft
         #Move a cabeça
@@ -62,50 +62,58 @@ class Snake(pygame.sprite.Sprite):
         if self.head.rect.y < FONTSIZE : self.head.rect.y = HEIGHT-10
         if self.head.rect.x >= WIDTH : self.head.rect.x = 0
         if self.head.rect.y >= HEIGHT: self.head.rect.y = FONTSIZE
-        #Checa se colide
-        if pygame.sprite.spritecollide(self.head,self.tail,False): global loop; loop = False
+        #Checa se colide com a cauda
+        if pygame.sprite.spritecollide(self.head,self.tail,True): loop = False
+
 class Fruit(pygame.sprite.Sprite):
-    def __init__(self,player,*grupos):
+    def __init__(self,player,fruits,*grupos):
         super().__init__()
+        self.image = pygame.Surface((10,10))
+        self.image.fill((255,0,0))
+        self.rect = pygame.Rect((0,0),(10,10))
         while True:
-            self.fruit = Square(10,10,(255,0,0),randint(0,(WIDTH-10)//10)*10,randint(FONTSIZE//10,(HEIGHT-10)//10)*10)
-            if pygame.sprite.spritecollide(self.fruit,player,False) or pygame.sprite.spritecollide(self.fruit,fruits,False): self.fruit.kill()
-            else: break
-        self.fruit.add(grupos)
+            self.rect.topleft = randint(0,(WIDTH-10)//10)*10, randint(FONTSIZE//10,(HEIGHT-10)//10)*10
+            if not(pygame.sprite.spritecollide(self,player,False) or pygame.sprite.spritecollide(self,fruits,False)): break
+        self.add(fruits, grupos)
         self.start = pygame.time.get_ticks()
-        self.image = self.fruit.image
-        self.rect = self.fruit.rect
         self.wait = randint(0,WAITTIME) + 5
     
     def update(self):
         self.elapsed = pygame.time.get_ticks() - self.start
         if self.elapsed > self.wait * 1000: 
-            fruit = Fruit(player_sprites,all_sprites,fruits)
-            fruits.add(fruit)
-            self.fruit.kill()
+            Fruit(player_sprites,all_sprites,fruits)
             self.kill()
 
 all_sprites = pygame.sprite.Group()
 player_sprites = pygame.sprite.Group()
 fruits = pygame.sprite.Group()
 
-player = Snake(all_sprites, player_sprites)
-for _ in range(FRUITQUANTITY): fruit = Fruit(player_sprites,fruits,all_sprites); fruits.add(fruit)
+player = Snake(player_sprites, all_sprites)
+for _ in range(min(FRUITQUANTITY,max_fruits)): Fruit(player_sprites,fruits,all_sprites);
+total_fruits += FRUITQUANTITY
 texto = pygame.font.SysFont("Arial",FONTSIZE,True,True)
-pontos = 0
 
+pontos = 0
 loop = True
+button_pressed = False #Evita morte por pressionar dois butoes
 while loop:
     for event in pygame.event.get():
         if event.type == pygame.QUIT : pygame.quit(); quit()
-        elif (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE): loop = False
+        elif (event.type == pygame.KEYDOWN and not button_pressed):
+            if (event.key == pygame.K_ESCAPE): loop = False
+            if (event.key == pygame.K_a or event.key == pygame.K_LEFT) and player.come != 0: player.vx,player.vy = -10,0; player.come = 2
+            if (event.key == pygame.K_s or event.key == pygame.K_DOWN) and player.come != 1: player.vx,player.vy = 0,10; player.come = 3
+            if (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and player.come != 2: player.vx,player.vy = 10,0; player.come = 0
+            if (event.key == pygame.K_w or event.key == pygame.K_UP) and player.come != 3: player.vx,player.vy = 0,-10; player.come = 1
+            button_pressed = True
+    button_pressed = False
 
-    clock.tick_busy_loop(20)
+    clock.tick_busy_loop(FPS)
+    pygame.display.set_caption(f'SNAKE (FPS:{clock.get_fps() :.2f})')
 
     screen.fill((0,0,0))
-    player.update()
+    player.update(fruits)
     fruits.update()
-
     screen.blit(texto.render(f"Pontuacao: {pontos}",True,(255,255,255)),(0,0))
     all_sprites.draw(screen)
 
@@ -114,7 +122,12 @@ while loop:
 #mensagem de pontuacao
 screen.fill((0,0,0))
 texto = pygame.font.SysFont("Arial",27,True,True)
-screen.blit(texto.render(f"Pontuacao Final: {pontos}",True,(255,255,255)),(WIDTH//2 - 4*29,HEIGHT//2-27//2))
+if max_fruits == pontos: 
+    frase = f"PONTUACAO MAXIMA! {pontos}"
+    screen.blit(texto.render(frase,True,(255,255,255)),(WIDTH//2 - 16*(len(frase)//2),HEIGHT//2-27//2))
+else: 
+    frase = f"Pontuacao Final: {pontos}"
+    screen.blit(texto.render(frase,True,(255,255,255)),(WIDTH//2 - 15*(len(frase)//2),HEIGHT//2-27//2))
 pygame.display.flip()
 
 loop = True
