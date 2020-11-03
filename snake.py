@@ -13,7 +13,8 @@ WAITTIME = 10
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption(f'SNAKE')
 clock = pygame.time.Clock()
-chomp = pygame.mixer.Sound("pacman_eatfruit.wav")
+cwd = path.dirname(path.realpath(__file__))
+chomp = pygame.mixer.Sound(path.join(cwd, "pacman_eatfruit.wav"))
 
 
 class Square(pygame.sprite.Sprite):
