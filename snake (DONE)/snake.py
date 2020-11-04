@@ -8,8 +8,9 @@ pygame.init()
 WIDTH,HEIGHT = 600, 600
 FONTSIZE = 20
 FRUITQUANTITY = 3
-FPS = 20
+FPS = 15
 WAITTIME = 10
+SPEED = 10
 
 #quantidade, max quantity
 total_fruits = 0
@@ -101,10 +102,10 @@ while loop:
         if event.type == pygame.QUIT : pygame.quit(); quit()
         elif (event.type == pygame.KEYDOWN and not button_pressed):
             if (event.key == pygame.K_ESCAPE): loop = False
-            if (event.key == pygame.K_a or event.key == pygame.K_LEFT) and player.come != 0: player.vx,player.vy = -10,0; player.come = 2
-            if (event.key == pygame.K_s or event.key == pygame.K_DOWN) and player.come != 1: player.vx,player.vy = 0,10; player.come = 3
-            if (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and player.come != 2: player.vx,player.vy = 10,0; player.come = 0
-            if (event.key == pygame.K_w or event.key == pygame.K_UP) and player.come != 3: player.vx,player.vy = 0,-10; player.come = 1
+            if (event.key == pygame.K_a or event.key == pygame.K_LEFT) and player.come != 0: player.vx,player.vy = -SPEED,0; player.come = 2
+            if (event.key == pygame.K_s or event.key == pygame.K_DOWN) and player.come != 1: player.vx,player.vy = 0,SPEED; player.come = 3
+            if (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and player.come != 2: player.vx,player.vy = SPEED,0; player.come = 0
+            if (event.key == pygame.K_w or event.key == pygame.K_UP) and player.come != 3: player.vx,player.vy = 0,-SPEED; player.come = 1
             button_pressed = True
     button_pressed = False
 

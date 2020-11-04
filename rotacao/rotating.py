@@ -31,7 +31,6 @@ class Bullet(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=rect.center+Vector2(rect.height//2,0).rotate(-angle))
         self.speed = speed.rotate(-angle)
         self.mask = pg.mask.from_surface(self.image)
-        self.teste = 0
 
     def update(self):
         self.rect.topleft += self.speed
@@ -72,7 +71,7 @@ while loop:
 
     for event in pg.event.get():
         if event.type == pg.QUIT: loop = False
-        if event.type == pg.MOUSEBUTTONDOWN: 
+        if event.type == pg.MOUSEBUTTONDOWN and event.button == 1: 
             som.play()
             bullets.add(Bullet(angle,bullet_speed,rect))
         if event.type == pg.KEYDOWN:
@@ -84,12 +83,13 @@ while loop:
 
     #movimento
     mouse=pg.mouse.get_pos()
+
     if not rect.collidepoint(mouse):
         rect.centerx += int(speed[0])
         rect.centery += int(speed[1])
-    if rect.collidepoint(mouse):
-        rect.centerx -= int(speed[0])
-        rect.centery -= int(speed[1])
+        if rect.collidepoint(mouse):
+            rect.centerx -= int(speed[0])
+            rect.centery -= int(speed[1])
 
 
     #girar
