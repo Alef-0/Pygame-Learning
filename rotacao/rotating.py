@@ -1,5 +1,6 @@
 import pygame as pg
 from math import atan2,pi
+from os import path
 
 pg.init()
 FPS = 60
@@ -16,8 +17,9 @@ def rotate(surface,angle,rect):
     return rotated_surface,rotated_rect
 
 #Triangulo
-space = pg.image.load("space.jpg").convert()
-sprite = pg.image.load("ship1.png").convert_alpha()
+cwd = path.dirname(path.realpath(__file__))
+space = pg.image.load(path.join(cwd,"space.jpg")).convert()
+sprite = pg.image.load(path.join(cwd,"ship1.png")).convert_alpha()
 sprite = pg.transform.rotate(sprite,-90).convert_alpha()
 sprite = pg.transform.scale(sprite,(100,100))
 rect = sprite.get_rect()
