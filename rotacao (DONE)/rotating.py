@@ -96,6 +96,12 @@ class Player(pg.sprite.Sprite):
         self.image, self.rect = rotate(self.original,angle,self.rect)
         self.mask = pg.mask.from_surface(self.image)
 
+        #Colisao com paredes
+        if self.rect.x < 0: self.rect.left = 0
+        if self.rect.y < 0: self.rect.top = 0
+        if self.rect.right > WIDTH: self.rect.right = WIDTH
+        if self.rect.bottom > HEIGHT: self.rect.bottom = HEIGHT
+
 class Texto(pg.sprite.Sprite):
     def __init__(self,fonte):
         self._layer = LAYER_TEXT
@@ -121,6 +127,7 @@ SOUNDEND = pg.event.custom_type()
 som = pg.mixer.Sound(path.join(CWD,"Shoot_02.wav"))
 pg.mixer.music.load(path.join(CWD,"Hardmoon_-_Deep_space.ogg"))
 som.set_volume(0.09)
+pg.mixer.music.set_volume(0.4)
 pg.mixer.music.play()
 #Walking
 
