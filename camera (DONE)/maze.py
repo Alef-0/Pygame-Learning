@@ -11,7 +11,7 @@ WIDTH_SCREEN,HEIGHT_SCREEN = 600,600
 width, height = 15,15
 CWD = path.dirname(__file__)
 FRICTION = -0.1
-TILE = 25
+TILE = 40
 FPS = 60
 screen = pg.display.set_mode((WIDTH_SCREEN,HEIGHT_SCREEN))
 
@@ -22,10 +22,10 @@ goals = pg.sprite.Group()
 
 #sprites
 floor = pg.transform.scale(pg.image.load(path.join(CWD,"floor.jpg")),(100,100)).convert()
-cheese = pg.transform.scale(pg.image.load(path.join(CWD,"cheese.png")),(25,25)).convert_alpha()
+cheese = pg.transform.scale(pg.image.load(path.join(CWD,"cheese.png")),(TILE,TILE)).convert_alpha()
 cheese.set_colorkey((255,255,255))
 mouse = pg.transform.scale(pg.image.load(path.join(CWD,"mouse.png")),(25,25)).convert_alpha()
-bricks = pg.transform.scale(pg.image.load(path.join(CWD,"bricks.png")),(25,25)).convert_alpha()
+bricks = pg.transform.scale(pg.image.load(path.join(CWD,"bricks.png")),(TILE,TILE)).convert_alpha()
 
 #funcoes
 

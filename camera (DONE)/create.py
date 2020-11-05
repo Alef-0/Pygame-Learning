@@ -30,4 +30,4 @@ def make_maze(w = 16, h = 8):
 def make_map(width=15,height=15):
     with open(path.join(CWD,"maze.txt"),"w") as f: f.write(make_maze(width,height))
 
-if __name__=="__main__": print(make_maze(2,2))
+if __name__=="__main__": print(make_maze(15,15))
