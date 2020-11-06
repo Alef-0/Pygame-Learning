@@ -49,7 +49,8 @@ class Player(pg.sprite.Sprite):
         if keyboard[pg.K_d]: self.accx += 0.5
 
         #imagem
-        rel_x,rel_y = goal.rect.x - self.rect.x,goal.rect.y - self.rect.y
+        mouse_x,mouse_y = pg.mouse.get_pos()
+        rel_x,rel_y = mouse_x - camera.camera.move(self.rect.topleft).x, mouse_y - camera.camera.move(self.rect.topleft).y
         self.angle = 180/pi * -atan2(rel_y,rel_x)
         self.image = pg.transform.rotozoom((self.original),self.angle+90,1)
 
