@@ -87,8 +87,8 @@ class Camera:
         return entity.rect.move(self.camera.topleft)
 
     def update(self, target):
-        x = -target.rect.x + int(WIDTH_SCREEN / 2)
-        y = -target.rect.y + int(HEIGHT_SCREEN / 2)
+        x = -(target.rect.x - int(WIDTH_SCREEN / 2))
+        y = -(target.rect.y - int(HEIGHT_SCREEN / 2))
 
         # limit scrolling to map size
         x = min(0, x)  # left

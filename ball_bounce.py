@@ -1,10 +1,11 @@
 import pygame as pg
 from pygame.math import Vector2 as v2
+from pygame.locals import *
 
 WIDTH,HEIGHT = 600,600
 FPS = 60
 pg.init()
-screen = pg.display.set_mode((WIDTH,HEIGHT))
+screen = pg.display.set_mode((WIDTH,HEIGHT), RESIZABLE)
 clock = pg.time.Clock()
 
 #bola
@@ -47,12 +48,17 @@ while loop:
     keyboard = pg.key.get_pressed()
     for event in pg.event.get():
         if event.type == pg.QUIT: loop = False
-        if event.type == pg.KEYDOWN:
+        elif event.type == pg.KEYDOWN:
             if event.key == pg.K_w and (player.rect.bottom==HEIGHT): velocity.y = -20
             elif event.key == pg.K_w and double: velocity.y = -20; double = False
+        elif event.type == VIDEORESIZE:
+            WIDTH = event.w
+            HEIGHT = event.h
     clock.tick_busy_loop(FPS)
     pg.display.set_caption(f"{clock.get_fps()}")
 
+
+    #JOGADOR
     if player.rect.bottom!=HEIGHT: acceleration = v2(0,0.9)
     else: acceleration = v2(0,0)
        
@@ -83,11 +89,10 @@ while loop:
         if abs(player.rect.right - box.rect.left) < abs(20):  box.rect.left = player.rect.right
         if abs(player.rect.left - box.rect.right) < abs(20):  box.rect.right = player.rect.left
 
-    #colisao
+    #BOLA QUICANDO
     box.rect.x += vx
     box.rect.y += vy
 
-    #colisao com box
     if pg.sprite.collide_mask(player,box):
         if abs(player.rect.top - box.rect.bottom) <= abs(vy): (vy)*=-1; box.rect.bottom = player.rect.top
         if abs(player.rect.bottom - box.rect.top) <= abs(vy): (vy)*=-1; box.rect.top = player.rect.bottom
@@ -99,8 +104,6 @@ while loop:
     if box.rect.top <= 0: vy*=-1; box.rect.top = 0
     if box.rect.bottom >= HEIGHT: vy*=-1; box.rect.bottom = HEIGHT
 
-    
-    
     screen.fill((255,255,255))
     screen.blit(box.image,box.rect)
     screen.blit(player.image,player.rect)
