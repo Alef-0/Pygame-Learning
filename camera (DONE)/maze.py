@@ -1,9 +1,8 @@
 import pygame as pg
 from os import path
 from math import pi,atan2
-
-from pygame.transform import rotate
 import create
+
 pg.init()
 
 #constantes
@@ -50,7 +49,7 @@ class Player(pg.sprite.Sprite):
 
         #imagem
         mouse_x,mouse_y = pg.mouse.get_pos()
-        rel_x,rel_y = mouse_x - camera.camera.move(self.rect.topleft).x, mouse_y - camera.camera.move(self.rect.topleft).y
+        rel_x,rel_y = mouse_x - camera.apply(self).x, mouse_y - camera.apply(self).y
         self.angle = 180/pi * -atan2(rel_y,rel_x)
         self.image = pg.transform.rotozoom((self.original),self.angle+90,1)
 
