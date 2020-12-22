@@ -32,4 +32,4 @@ def make_map(width=15,height=15):
 
 if __name__=="__main__": 
     with open("maze.txt","w") as f:
-        f.write(make_maze(50,50))
+        f.write(make_maze(15,24))
