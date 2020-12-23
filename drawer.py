@@ -30,11 +30,12 @@ while loop:
         if event.type == py.QUIT: loop = False
         elif event.type == py.KEYDOWN:
             if event.key == py.K_ESCAPE: loop = False
-            if event.key == py.K_0: screen.fill(WHITE)
-            else: color = color_dict.setdefault(event.key, color)
+            elif event.key == py.K_0: screen.fill(WHITE)
+            color = color_dict.get(event.key, color)
         elif event.type == py.MOUSEBUTTONDOWN:
             if event.button == 4 and radius < 50: radius+=1
             elif event.button == 5 and radius > 1: radius-=1
+
     clock.tick_busy_loop(60)
     display.set_caption(f'PAINT (FPS:{clock.get_fps()})')
                 
@@ -42,8 +43,9 @@ while loop:
     mouse_pos = py.mouse.get_pos()
     mouse_btn = py.mouse.get_pressed(3)
 
-    if mouse_btn[0]:    py.draw.circle(screen,color,mouse_pos,radius)
+    if mouse_btn[0]:  py.draw.circle(screen,color,mouse_pos,radius)
     if mouse_btn[2]:  py.draw.circle(screen,WHITE,mouse_pos,radius)
+
     draw.rect(screen,WHITE,Rect(0,0,50,50))
     if not color == WHITE: draw.rect(screen,color,Rect(0,0,radius,radius))
     else: draw.lines(screen,BLACK,False,[(0,radius),(radius,radius),(radius,0)])
