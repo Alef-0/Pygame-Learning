@@ -27,7 +27,6 @@ color = BLACK
 screen = display.set_mode((WIDTH,HEIGHT))
 screen.fill(WHITE)
 clock = time.Clock()
-pressed = False
 last_mouse_pos = (0,0)
 green_flag,red_flag,blue_flag = False,False,False   
 fonte = py.font.Font(path.join(CWD,"times-roman.ttf"),50)
@@ -64,11 +63,10 @@ while loop:
             #outros
             elif event.button == 4 and radius < 50: radius+=1
             elif event.button == 5 and radius > 1: radius-=1
-            elif event.button < 3: pressed = True            
         elif event.type == py.MOUSEBUTTONUP:
-            if event.button < 3: pressed = False
-    clock.tick_busy_loop(60)
-    display.set_caption(f'PAINT (FPS:{clock.get_fps()})')
+            pass
+    clock.tick_busy_loop(1200)
+    display.set_caption(f'PAINT (FPS:{clock.get_fps():04.2f})')
     draw.rect(screen,WHITE,Rect(0,0,WIDTH,50))
 
     #comandos
@@ -96,11 +94,13 @@ while loop:
     number = 1
     for colors in color_dict.values():
         rectangle.move_ip(50,0)
-        if not colors == WHITE:
+        if not colors == BLACK and not colors == WHITE:
             draw.rect(screen,colors,rectangle)
+            screen.blit(fonte.render(f"{number}",True,BLACK),rectangle.midtop)
+        elif colors == BLACK:
+            draw.rect(screen,BLACK,rectangle)
             screen.blit(fonte.render(f"{number}",True,WHITE),rectangle.midtop)
         else:
-            # draw.lines(screen,BLUE,False,[(rectangle.x,rectangle.y+rectangle.height-1),(rectangle.x+rectangle.width,rectangle.y+rectangle.height-1),rectangle.topright])
             draw.rect(screen,BLACK,rectangle,1)
             screen.blit(fonte.render(f"{number}",True,BLACK),rectangle.midtop)
         number+=1
