@@ -16,6 +16,12 @@ MAGENTA = Color(255,0,255)
 ANIL = Color(0,255,255)
 CWD = path.dirname(__file__)
 
+class Base(sprite.Sprite):
+    image : surface.Surface
+    rect : Rect
+    def __init__(self,groups):
+        sprite.Sprite.__init__(self,groups)
+
 color_dict = {py.K_1:BLACK, py.K_2:RED, py.K_3:GREEN, py.K_4:BLUE, 
                 py.K_5: YELLOW,py.K_6:MAGENTA,py.K_7:ANIL, py.K_8: WHITE}
 
@@ -33,16 +39,19 @@ fonte.bold = True
 loop = True
 
 #canvas
-paint = surface.Surface((600,600))
-paint_rect = paint.get_rect(topleft=(0,0))
-paint.fill(WHITE)
-group = sprite.Group()
 
-class Cursor(sprite.Sprite):
-    image : surface.Surface
-    rect : Rect 
+group = sprite.LayeredUpdates()
+class Canvas(Base):
     def __init__(self,*groups):
-        sprite.Sprite.__init__(self,groups)
+        Base.__init__(self,groups)
+        self.image = surface.Surface((600,600))
+        self.rect = self.image.get_rect(topleft=(0,0))
+        self.image.fill(WHITE)
+canvas = Canvas(group)
+class Cursor(Base):
+    def __init__(self,*groups):
+        _layer = 2
+        Base.__init__(self,groups)
         self.image = surface.Surface((50,50))
         self.image.fill(WHITE)
         draw.circle(self.image,BLACK,(25,25),radius,1)
@@ -54,11 +63,10 @@ class Cursor(sprite.Sprite):
         self.image.fill(WHITE)
         draw.circle(self.image,BLACK,(25,25),radius,1)
 cursor = Cursor(group)
-class Menu(sprite.Sprite):
-    image : surface.Surface
-    rect : Rect
+class Menu(Base):
     def __init__(self,*groups):
-        sprite.Sprite.__init__(self,groups)
+        _layer = 3
+        Base.__init__(self,groups)
         self.image = surface.Surface((600,50))
         self.rect = self.image.get_rect(topleft=(0,0))
         self.image.fill(WHITE)
@@ -113,7 +121,7 @@ while loop:
             if evento.button == 1: button_1_flag = False
             elif evento.button == 3: button_2_flag = False
         elif evento.type == py.KEYDOWN:
-            if evento.key == py.K_0: paint.fill(WHITE)
+            if evento.key == py.K_0: canvas.image.fill(WHITE)
             elif evento.key == py.K_q: red_flag = True
             elif evento.key == py.K_w: green_flag = True
             elif evento.key == py.K_e: blue_flag = True
@@ -125,19 +133,17 @@ while loop:
     #update
     clock.tick()
     group.update()
-    display.set_caption(f'Draw game FPS:{int(clock.get_fps())}')
+    display.set_caption(f'Draw game')
     #Draw:
     mouse_pos = mouse.get_pos()
     if button_1_flag:
-        if last_mouse_pos == mouse_pos: draw.circle(paint,color,last_mouse_pos,radius-2) # O -2 suaviza as linhas
-        else: draw.line(paint,color,last_mouse_pos,mouse_pos,radius*2)
+        if last_mouse_pos == mouse_pos: draw.circle(canvas.image,color,last_mouse_pos,radius-2) # O -2 suaviza as linhas
+        else: draw.line(canvas.image,color,last_mouse_pos,mouse_pos,radius*2)
     elif button_2_flag:
-        if last_mouse_pos == mouse_pos: draw.circle(paint,WHITE,last_mouse_pos,radius-2) # O -2 suaviza as linhas
-        else: draw.line(paint,WHITE,last_mouse_pos,mouse_pos,radius*2)
+        if last_mouse_pos == mouse_pos: draw.circle(canvas.image,WHITE,last_mouse_pos,radius-2) # O -2 suaviza as linhas
+        else: draw.line(canvas.image,WHITE,last_mouse_pos,mouse_pos,radius*2)
     last_mouse_pos = mouse_pos
-    screen.blit(paint,paint_rect)
-    screen.blit(cursor.image,cursor.rect)
-    screen.blit(menu.image,menu.rect)
+    group.draw(screen)
     display.flip()
 
 py.quit()
