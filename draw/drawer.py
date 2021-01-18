@@ -27,8 +27,8 @@ clock = time.Clock()
 last_mouse_pos = (0,0)
 green_flag,red_flag,blue_flag = False,False,False   
 button_1_flag, button_2_flag = False,False
-fonte = font.Font(path.join(CWD,"times-roman.ttf"),15)
-numeros = font.Font(path.join(CWD,"times-roman.ttf"),50)
+fonte = font.SysFont("Times New Roman",15)
+numeros = font.SysFont("Times New Roman",50)
 fonte.bold = True
 loop = True
 
@@ -69,11 +69,11 @@ class Menu(sprite.Sprite):
                 draw.rect(self.image, cores, Rect((start,0),(50,50)))
                 self.image.blit(numeros.render(f'{int((start-95)/50)}',True,BLACK),(start+25,0))
             elif cores == WHITE: 
-                draw.rect(self.image, BLACK, Rect(start,0,50,50), 1)
                 self.image.blit(numeros.render(f'{int((start-95)/50)}',True,BLACK),(start+25,0))
             else: 
                 draw.rect(self.image, BLACK, Rect(start,0,50,50))
                 self.image.blit(numeros.render(f'{int((start-95)/50)}',True,WHITE),(start+25,0))
+            draw.rect(self.image, BLACK, Rect(start,0,50,50), 1)
             start+=50
         draw.line(self.image,RED,(550,0),(600,50),5)
         draw.line(self.image,RED,(600,0),(550,50),5)
@@ -108,7 +108,7 @@ while loop:
             elif evento.button == 4: 
                 if radius < 25: radius+=1
             elif evento.button == 5: 
-                if radius > 0: radius-=1
+                if radius > 1: radius-=1
         elif evento.type == py.MOUSEBUTTONUP:
             if evento.button == 1: button_1_flag = False
             elif evento.button == 3: button_2_flag = False
@@ -125,15 +125,16 @@ while loop:
     #update
     clock.tick()
     group.update()
+    display.set_caption(f'Draw game FPS:{int(clock.get_fps())}')
     #Draw:
+    mouse_pos = mouse.get_pos()
     if button_1_flag:
-        mouse_pos = mouse.get_pos()
         if last_mouse_pos == mouse_pos: draw.circle(paint,color,last_mouse_pos,radius-2) # O -2 suaviza as linhas
-        else: draw.line(paint,color,last_mouse_pos,mouse_pos,radius*2); last_mouse_pos = mouse_pos
+        else: draw.line(paint,color,last_mouse_pos,mouse_pos,radius*2)
     elif button_2_flag:
-        mouse_pos = mouse.get_pos()
         if last_mouse_pos == mouse_pos: draw.circle(paint,WHITE,last_mouse_pos,radius-2) # O -2 suaviza as linhas
-        else: draw.line(paint,WHITE,last_mouse_pos,mouse_pos,radius*2); last_mouse_pos = mouse_pos
+        else: draw.line(paint,WHITE,last_mouse_pos,mouse_pos,radius*2)
+    last_mouse_pos = mouse_pos
     screen.blit(paint,paint_rect)
     screen.blit(cursor.image,cursor.rect)
     screen.blit(menu.image,menu.rect)
