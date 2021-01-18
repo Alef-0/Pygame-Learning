@@ -1,114 +1,142 @@
 import pygame as py
-from pygame import Color,display,draw,Rect,time,mouse,font
+from pygame import Color,display,draw,Rect,time,mouse,font,event,sprite,surface
 from os import path
 
 py.init()
 
 #Constantes
 WIDTH,HEIGHT = 600,600
-WHITE = (255,255,255)
-RED = (255,0,0)
-GREEN = (0,255,0)
-BLUE = (0,0,255)
-BLACK = (0,0,0)
-AMARELO = (255,255,0)
-MAGENTA = (255,0,255)
-ANIL = (0,255,255)
+WHITE = Color(255,255,255)
+RED = Color(255,0,0)
+GREEN = Color(0,255,0)
+BLUE = Color(0,0,255)
+BLACK = Color(0,0,0)
+YELLOW = Color(255,255,0)
+MAGENTA = Color(255,0,255)
+ANIL = Color(0,255,255)
 CWD = path.dirname(__file__)
 
 color_dict = {py.K_1:BLACK, py.K_2:RED, py.K_3:GREEN, py.K_4:BLUE, 
-                py.K_5: AMARELO,py.K_6:MAGENTA,py.K_7:ANIL, py.K_8: WHITE}
+                py.K_5: YELLOW,py.K_6:MAGENTA,py.K_7:ANIL, py.K_8: WHITE}
 
 #variaveis
 radius = 10
-color = BLACK
-
-#tudo
+color = Color(0,0,0)
 screen = display.set_mode((WIDTH,HEIGHT))
-screen.fill(WHITE)
 clock = time.Clock()
 last_mouse_pos = (0,0)
 green_flag,red_flag,blue_flag = False,False,False   
-fonte = py.font.Font(path.join(CWD,"times-roman.ttf"),50)
-
+button_1_flag, button_2_flag = False,False
+fonte = font.Font(path.join(CWD,"times-roman.ttf"),15)
+numeros = font.Font(path.join(CWD,"times-roman.ttf"),50)
+fonte.bold = True
 loop = True
+
+#canvas
+paint = surface.Surface((600,600))
+paint_rect = paint.get_rect(topleft=(0,0))
+paint.fill(WHITE)
+group = sprite.Group()
+
+class Cursor(sprite.Sprite):
+    image : surface.Surface
+    rect : Rect 
+    def __init__(self,*groups):
+        sprite.Sprite.__init__(self,groups)
+        self.image = surface.Surface((50,50))
+        self.image.fill(WHITE)
+        draw.circle(self.image,BLACK,(25,25),radius,1)
+        self.image.set_colorkey((255,255,255))
+        self.rect = self.image.get_rect(center = mouse.get_pos())
+
+    def update(self):
+        self.rect.center = mouse.get_pos()
+        self.image.fill(WHITE)
+        draw.circle(self.image,BLACK,(25,25),radius,1)
+cursor = Cursor(group)
+class Menu(sprite.Sprite):
+    image : surface.Surface
+    rect : Rect
+    def __init__(self,*groups):
+        sprite.Sprite.__init__(self,groups)
+        self.image = surface.Surface((600,50))
+        self.rect = self.image.get_rect(topleft=(0,0))
+        self.image.fill(WHITE)
+        #desenhar quadrados
+        start = 145
+        for cores in color_dict.values():
+            if cores != BLACK and cores != WHITE: 
+                draw.rect(self.image, cores, Rect((start,0),(50,50)))
+                self.image.blit(numeros.render(f'{int((start-95)/50)}',True,BLACK),(start+25,0))
+            elif cores == WHITE: 
+                draw.rect(self.image, BLACK, Rect(start,0,50,50), 1)
+                self.image.blit(numeros.render(f'{int((start-95)/50)}',True,BLACK),(start+25,0))
+            else: 
+                draw.rect(self.image, BLACK, Rect(start,0,50,50))
+                self.image.blit(numeros.render(f'{int((start-95)/50)}',True,WHITE),(start+25,0))
+            start+=50
+        draw.line(self.image,RED,(550,0),(600,50),5)
+        draw.line(self.image,RED,(600,0),(550,50),5)
+        draw.rect(self.image, BLACK, Rect(550,0,50,50), 1)
+        self.image.blit(numeros.render(f'{0}',True,BLACK),(563,0))
+    def update(self):
+        draw.rect(self.image,WHITE,Rect((0,0),(150,50)))
+        draw.circle(self.image,color,(26,25),radius) #Um pixel a esquerda para ficar mais bonito
+        draw.circle(self.image,BLACK,(26,25),radius,1)
+        #Valores
+        self.image.blit(fonte.render(f'(Q) R = {color.r :3}',True,RED),Rect((55,0),(50,50)))
+        self.image.blit(fonte.render(f'(W) G = {color.g :3}',True,GREEN),Rect((55,15),(50,50)))
+        self.image.blit(fonte.render(f'(E) B = {color.b :3}',True,BLUE),Rect((55,30),(50,50)))
+menu = Menu(group)
+#Tudo
+
 while loop:
-    for event in py.event.get():
-        if event.type == py.QUIT: loop = False
-        elif event.type == py.KEYDOWN:
-            if event.key == py.K_ESCAPE: loop = False
-            elif event.key == py.K_0: screen.fill(WHITE)
-            color = color_dict.get(event.key, color)
-            if event.key == py.K_z and event.mod & py.KMOD_CTRL: screen.fill(WHITE)
-            #Checar as flags
-            elif event.key == py.K_q: red_flag = True
-            elif event.key == py.K_w: green_flag = True
-            elif event.key == py.K_e: blue_flag = True
-        elif event.type == py.KEYUP:
-            if event.key == py.K_q: red_flag = False
-            elif event.key == py.K_w: green_flag = False
-            elif event.key == py.K_e: blue_flag = False 
-        elif event.type == py.MOUSEBUTTONDOWN:
-            #mudar cores
-            if red_flag or blue_flag or green_flag:
-                if red_flag:
-                    if event.button == 4 and color[0] < 255: color = (color[0]+15,*color[1:])
-                    elif event.button == 5 and color[0] > 0: color = (color[0]-15,*color[1:])
-                if green_flag:
-                    if event.button == 4 and color[1] < 255: color = (color[0],color[1]+15,color[2])
-                    elif event.button == 5 and color[1] > 0: color = (color[0],color[1]-15,color[2])
-                if blue_flag:
-                    if event.button == 4 and color[2] < 255: color = (*color[0:2],color[2]+15)
-                    elif event.button == 5 and color[2] > 0: color = (*color[0:2],color[2]-15)
-            #outros
-            elif event.button == 4 and radius < 50: radius+=1
-            elif event.button == 5 and radius > 1: radius-=1
-        elif event.type == py.MOUSEBUTTONUP:
-            pass
-    clock.tick_busy_loop(1200)
-    display.set_caption(f'PAINT (FPS:{clock.get_fps():04.2f})')
-    draw.rect(screen,WHITE,Rect(0,0,WIDTH,50))
-
-    #comandos
-    mouse_pos = mouse.get_pos()
-    mouse_btn = mouse.get_pressed(3)
-    rectangle = Rect(0,0,radius,radius)
-    rectangle.center = (25,25)
-
-    if mouse_btn[0]: 
-        draw.circle(screen,color,last_mouse_pos,radius)
-        draw.line(screen,color,last_mouse_pos, mouse_pos,2*radius)
-        draw.circle(screen,color,mouse_pos,radius)
-    if mouse_btn[2]: 
-        draw.circle(screen,WHITE,last_mouse_pos,radius)
-        draw.line(screen,WHITE,last_mouse_pos, mouse_pos,2*radius)
-        draw.circle(screen,WHITE,mouse_pos,radius)
-    draw.rect(screen,WHITE,Rect(0,0,50,50))
-    if not color == WHITE: draw.rect(screen,color,rectangle)
-    else: draw.rect(screen,BLACK,rectangle,1)
-    draw.lines(screen,BLACK,False,[(0,50),(50,50),(50,0)])
-
-    #desenhar
-    rectangle = Rect(0,0,51,51)
-    rectangle.x = 50
-    number = 1
-    for colors in color_dict.values():
-        rectangle.move_ip(50,0)
-        if not colors == BLACK and not colors == WHITE:
-            draw.rect(screen,colors,rectangle)
-            screen.blit(fonte.render(f"{number}",True,BLACK),rectangle.midtop)
-        elif colors == BLACK:
-            draw.rect(screen,BLACK,rectangle)
-            screen.blit(fonte.render(f"{number}",True,WHITE),rectangle.midtop)
-        else:
-            draw.rect(screen,BLACK,rectangle,1)
-            screen.blit(fonte.render(f"{number}",True,BLACK),rectangle.midtop)
-        number+=1
-    screen.blit(fonte.render(f'{0}',True,BLACK),Rect(WIDTH-38,0,50,50))
-    draw.line(screen,RED,(WIDTH,0),(WIDTH-50,50),5)
-    draw.line(screen,RED,(WIDTH-50,0),(WIDTH,50),5)
-
+    #eventos
+    for evento in event.get():
+        if evento.type == py.QUIT: loop = False
+        elif evento.type == py.MOUSEBUTTONDOWN:
+            if evento.button == 1: button_1_flag = True; last_mouse_pos = mouse.get_pos()
+            elif evento.button == 3: button_2_flag = True; last_mouse_pos = mouse.get_pos()
+            elif red_flag or blue_flag or green_flag:
+                if evento.button == 4: add = 15
+                elif evento.button == 5: add = -15
+                else: add = 0
+                #calcular
+                if red_flag and color.r + add <= 255 and  color.r + add >= 0: color.r += add
+                if green_flag and color.g + add <= 255 and  color.g + add >= 0: color.g += add
+                if blue_flag and color.b + add <= 255 and  color.b + add >= 0: color.b += add         
+            elif evento.button == 4: 
+                if radius < 25: radius+=1
+            elif evento.button == 5: 
+                if radius > 0: radius-=1
+        elif evento.type == py.MOUSEBUTTONUP:
+            if evento.button == 1: button_1_flag = False
+            elif evento.button == 3: button_2_flag = False
+        elif evento.type == py.KEYDOWN:
+            if evento.key == py.K_0: paint.fill(WHITE)
+            elif evento.key == py.K_q: red_flag = True
+            elif evento.key == py.K_w: green_flag = True
+            elif evento.key == py.K_e: blue_flag = True
+            else: color = Color(color_dict.get(evento.key,color))
+        elif evento.type == py.KEYUP:
+            if evento.key == py.K_q: red_flag = False
+            elif evento.key == py.K_w: green_flag = False
+            elif evento.key == py.K_e: blue_flag = False
+    #update
+    clock.tick()
+    group.update()
+    #Draw:
+    if button_1_flag:
+        mouse_pos = mouse.get_pos()
+        if last_mouse_pos == mouse_pos: draw.circle(paint,color,last_mouse_pos,radius-2) # O -2 suaviza as linhas
+        else: draw.line(paint,color,last_mouse_pos,mouse_pos,radius*2); last_mouse_pos = mouse_pos
+    elif button_2_flag:
+        mouse_pos = mouse.get_pos()
+        if last_mouse_pos == mouse_pos: draw.circle(paint,WHITE,last_mouse_pos,radius-2) # O -2 suaviza as linhas
+        else: draw.line(paint,WHITE,last_mouse_pos,mouse_pos,radius*2); last_mouse_pos = mouse_pos
+    screen.blit(paint,paint_rect)
+    screen.blit(cursor.image,cursor.rect)
+    screen.blit(menu.image,menu.rect)
     display.flip()
-    last_mouse_pos = mouse.get_pos()
 
 py.quit()
