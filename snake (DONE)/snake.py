@@ -117,6 +117,8 @@ while loop:
     fruits.update()
     screen.blit(texto.render(f"Pontuacao: {pontos}",True,(255,255,255)),(0,0))
     all_sprites.draw(screen)
+    #bordas
+    pygame.draw.lines(screen,(255,255,255),True,[(0,FONTSIZE),(WIDTH-1,FONTSIZE),(WIDTH-1, HEIGHT-1),(0, HEIGHT-1)])
 
     pygame.display.flip()
 

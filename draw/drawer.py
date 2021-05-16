@@ -1,6 +1,8 @@
 import pygame as py
-from pygame import Color,display,draw,Rect,time,mouse,font,event,sprite,surface
-from os import path
+import datetime 
+from pygame import Color,display,draw,Rect,time, \
+mouse,font,event,sprite,surface,image
+from os import path,mkdir
 
 py.init()
 
@@ -97,11 +99,31 @@ class Menu(Base):
         self.image.blit(fonte.render(f'(E) B = {color.b :3}',True,BLUE),Rect((55,30),(50,50)))
 menu = Menu(group)
 #Tudo
+def save_image():
+    retangulo = Rect(150,250,300,100)
+    draw.rect(screen,'gray',retangulo)
+    screen.blit(numeros.render(f"Deseja Salvar",True,BLACK),retangulo)
+    screen.blit(numeros.render(f"        Y\\N",True,BLACK),Rect(150,300,300,100))
+    display.flip()
+    flag = True
+    while flag:
+        for evento in event.get():
+            if evento.type == py.KEYDOWN:
+                if evento.key == py.K_y:
+                    imagem = canvas.image.subsurface(Rect(0,50,600,550))
+                    now = datetime.datetime.now().strftime("%d-%m-%Y %H-%M-%S")
+                    image.save(imagem,f"{now}.png")
+                    flag = False
+                elif evento.key == py.K_n: flag = False
+            elif evento.type == py.QUIT: flag=False
+
 
 while loop:
     #eventos
     for evento in event.get():
-        if evento.type == py.QUIT: loop = False
+        if evento.type == py.QUIT: 
+            loop = False
+            save_image()        
         elif evento.type == py.MOUSEBUTTONDOWN:
             if evento.button == 1: button_1_flag = True; last_mouse_pos = mouse.get_pos()
             elif evento.button == 3: button_2_flag = True; last_mouse_pos = mouse.get_pos()
@@ -144,6 +166,6 @@ while loop:
         else: draw.line(canvas.image,WHITE,last_mouse_pos,mouse_pos,radius*2)
     last_mouse_pos = mouse_pos
     group.draw(screen)
-    display.flip()
+    display.update()
 
 py.quit()
